@@ -54,24 +54,21 @@ static int parse_note(char *str)
 
 static void print_usage(FILE *stream, const char *progname)
 {
-	fprintf(stream, "Usage: %s [-n note] [-d time] [-o octave]\n", progname);
+	fprintf(stream, "Usage: %s [-d time] [-o octave] note\n", progname);
 }
 
 int main(int argc, char *argv[])
 {
 	struct playback_handle handle;
 	int err, opt;
-	enum note note = NOTE_A;
+	enum note note;
 	double duration = 0.0;
 	int octave = 0;
 	sigset_t sigset;
 	siginfo_t siginfo;
 
-	while ((opt = getopt(argc, argv, "n:d:o:h")) != -1) {
+	while ((opt = getopt(argc, argv, "d:o:h")) != -1) {
 		switch (opt) {
-		case 'n':
-			note = parse_note(optarg);
-			break;
 		case 'd':
 			duration = atof(optarg);
 			break;
@@ -86,6 +83,13 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 	}
+
+	if (optind >= argc) {
+		print_usage(stderr, argv[0]);
+		return EXIT_FAILURE;
+	}
+
+	note = parse_note(argv[optind]);
 
 	if (octave < -1) {
 		fprintf(stderr, "Note is too low\n");
